@@ -2,9 +2,9 @@
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
   </Folder>
+  <Project Path="SecureGate.Api/SecureGate.Api.csproj" />
   <Project Path="SecureGate.Application/SecureGate.Application.csproj" />
   <Project Path="SecureGate.Domain/SecureGate.Domain.csproj" />
   <Project Path="SecureGate.Infrastructure/SecureGate.Infrastructure.csproj" />
   <Project Path="SecureGate.Tests/SecureGate.Tests.csproj" />
-  <Project Path="SewcureGate.Api/SecureGate.Api.csproj" />
 </Solution>
