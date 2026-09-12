@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: securegate-sql
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "ThisIsSoStrongAndSecure123!"
+    ports:
+      - "1433:1433"
+
+  redis:
+    image: redis:7
+    container_name: securegate-redis
+    ports:
+      - "6379:6379"
