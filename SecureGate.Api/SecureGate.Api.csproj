@@ -10,4 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\SecureGate.Application\SecureGate.Application.csproj" />
+    <ProjectReference Include="..\SecureGate.Infrastructure\SecureGate.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>
