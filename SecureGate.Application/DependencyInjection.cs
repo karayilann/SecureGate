@@ -1,7 +1,9 @@
-﻿using System.Reflection;
-using FluentValidation;
+﻿using FluentValidation;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using SecureGate.Application.Common.Behaviors;
 using SecureGate.Application.Mapping;
+using System.Reflection;
 
 namespace SecureGate.Application;
 
@@ -12,6 +14,7 @@ public static class DependencyInjection
         var assembly = Assembly.GetExecutingAssembly();
 
         services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(assembly));
+        services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
         services.AddValidatorsFromAssembly(assembly);
 
