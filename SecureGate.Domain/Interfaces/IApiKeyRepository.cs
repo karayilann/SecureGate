@@ -2,11 +2,7 @@
 
 namespace SecureGate.Domain.Interfaces;
 
-public interface IApiKeyRepository
+public interface IApiKeyRepository : IGenericRepository<ApiKey>
 {
-    Task<ApiKey?> GetByIdAsync(Guid id);
     Task<ApiKey?> GetByKeyValueAsync(string keyValue);
-    Task AddAsync(ApiKey apiKey);
-    Task UpdateAsync(ApiKey apiKey);
-
 }

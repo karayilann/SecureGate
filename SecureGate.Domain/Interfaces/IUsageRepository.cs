@@ -1,11 +1,8 @@
-﻿
-using SecureGate.Domain.Entities;
+﻿using SecureGate.Domain.Entities;
 
-namespace SecureGate.Domain.Interfaces
+namespace SecureGate.Domain.Interfaces;
+
+public interface IUsageRepository : IGenericRepository<UsageRecord>
 {
-    public interface IUsageRepository
-    {
-        Task AddAsync(UsageRecord usage);
-        Task<List<UsageRecord>> GetRecentByApiKeyIdAsync(Guid apiKeyId, DateTime since);
-    }
+    Task<List<UsageRecord>> GetRecentByApiKeyIdAsync(Guid apiKeyId, DateTime since);
 }
