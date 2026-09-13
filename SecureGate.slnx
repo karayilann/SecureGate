@@ -1,4 +1,6 @@
 <Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/.workflows/" />
   <Folder Name="/Solution Items/">
     <File Path="docker-compose.yml" />
   </Folder>
