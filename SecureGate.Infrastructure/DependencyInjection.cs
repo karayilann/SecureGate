@@ -14,6 +14,12 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
+            options.InstanceName = "SecureGate:";
+        });
+
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();
         services.AddScoped<IUsageRepository, UsageRepository>();
