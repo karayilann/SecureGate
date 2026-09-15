@@ -20,6 +20,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<ApiKeyAuthMiddleware>();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
