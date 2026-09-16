@@ -69,7 +69,7 @@ public class RedisRateLimiterTests : IClassFixture<RedisFixture>
         var first = await _rateLimiter.CheckAsync(clientId, limit, window);
         var second = await _rateLimiter.CheckAsync(clientId, limit, window);
 
-        await Task.Delay(TimeSpan.FromSeconds(2.5));
+        await Task.Delay(TimeSpan.FromSeconds(2.5), TestContext.Current.CancellationToken);
 
         var third = await _rateLimiter.CheckAsync(clientId, limit, window);
 
