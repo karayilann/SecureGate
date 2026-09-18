@@ -34,9 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<ApiKeyAuthMiddleware>();
-app.UseMiddleware<RateLimitMiddleware>();
+app.UseSecureGatePipeline();
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
