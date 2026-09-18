@@ -27,7 +27,7 @@ public class ApiKeyAuthMiddlewareTests
     private static DefaultHttpContext CreateContextForProxyPath()
     {
         var context = new DefaultHttpContext();
-        context.Request.Path = "/proxy/optimize";
+        context.Request.Path = "/proxy";
         return context;
     }
 

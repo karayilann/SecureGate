@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using SecureGate.Application.Features.Proxy.Queries.ProxyRequest;
+using SecureGate.Application.Interfaces;
 
 namespace SecureGate.Api.Controllers;
 
@@ -6,9 +9,15 @@ namespace SecureGate.Api.Controllers;
 [Route("proxy")]
 public class ProxyController : ControllerBase
 {
-    [HttpGet("optimize")]
-    public IActionResult Optimize([FromQuery] string url)
+    private readonly IMediator _mediator;
+
+    public ProxyController(IMediator mediator) => _mediator = mediator;
+
+    [HttpGet]
+    [ProducesResponseType(typeof(BackendResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Get([FromQuery] string resource)
     {
-        return Ok(new { message = "Middleware passed", url });
+        var result = await _mediator.Send(new ProxyRequestQuery(resource));
+        return Ok(result);
     }
 }

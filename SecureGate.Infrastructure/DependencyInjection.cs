@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Interfaces;
 using SecureGate.Infrastructure.Persistence;
+using SecureGate.Infrastructure.Backend;
 using SecureGate.Infrastructure.Persistence.Repositories;
 using SecureGate.Infrastructure.RateLimiting;
 using StackExchange.Redis;
@@ -27,6 +28,8 @@ public static class DependencyInjection
             ConnectionMultiplexer.Connect(configuration.GetConnectionString("Redis")!));
 
         services.AddSingleton<IRateLimiter, RedisRateLimiter>();
+
+        services.AddScoped<IBackendService, MockBackendService>();
 
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();
