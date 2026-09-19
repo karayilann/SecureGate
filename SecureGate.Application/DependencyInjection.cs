@@ -1,7 +1,9 @@
 ﻿using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
+using SecureGate.Application.Anomaly;
 using SecureGate.Application.Common.Behaviors;
+using SecureGate.Application.Interfaces;
 using SecureGate.Application.Mapping;
 using System.Reflection;
 
@@ -17,6 +19,7 @@ public static class DependencyInjection
         services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
         services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
         services.AddValidatorsFromAssembly(assembly);
+        services.AddSingleton<IAnomalyDetector, AnomalyDetector>();
 
         return services;
     }

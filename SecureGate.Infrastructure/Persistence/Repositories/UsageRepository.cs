@@ -16,12 +16,15 @@ namespace SecureGate.Infrastructure.Persistence.Repositories
             await _context.UsageRecords.FirstOrDefaultAsync(x => x.Id == id);
 
         public async Task<List<UsageRecord>> GetRecentByApiKeyIdAsync(Guid apiKeyId, DateTime since)
-            => await _context.UsageRecords.Where(u => u.ApiKeyId == apiKeyId && u.Timestamp >= since).ToListAsync();
+            => await _context.UsageRecords.AsNoTracking().Where(u => u.ApiKeyId == apiKeyId && u.Timestamp >= since).ToListAsync();
 
-        public Task UpdateAsync(UsageRecord entity)
+        public async Task<List<UsageRecord>> GetRecentAsync(DateTime since)
+            => await _context.UsageRecords.AsNoTracking().Where(u => u.Timestamp >= since).ToListAsync();
+
+        public async Task UpdateAsync(UsageRecord entity)
         {
             _context.UsageRecords.Update(entity);
-            return Task.CompletedTask;
+            await _context.SaveChangesAsync();
         }
     }
 }

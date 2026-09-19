@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Interfaces;
 using SecureGate.Infrastructure.Backend;
+using SecureGate.Infrastructure.BackgroundJobs;
 using SecureGate.Infrastructure.Caching;
 using SecureGate.Infrastructure.Persistence;
 using SecureGate.Infrastructure.Persistence.Repositories;
@@ -37,7 +38,10 @@ public static class DependencyInjection
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();
         services.AddScoped<IUsageRepository, UsageRepository>();
+        services.AddScoped<IAnomalyLogRepository, AnomalyLogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        services.AddHostedService<AnomalyDetectionWorker>();
 
         return services;
     }
