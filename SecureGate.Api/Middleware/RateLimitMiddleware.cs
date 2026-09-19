@@ -1,5 +1,4 @@
 using SecureGate.Application.Interfaces;
-using SecureGate.Domain.Entities;
 using SecureGate.Domain.Enums;
 
 namespace SecureGate.Api.Middleware;
@@ -25,19 +24,19 @@ public class RateLimitMiddleware
             return;
         }
 
-        if (context.Items["ApiKey"] is not ApiKey apiKey || apiKey.Plan is null)
+        if (context.Items["ApiKey"] is not CachedApiKey apiKey)
         {
             await _next(context);
             return;
         }
 
-        if (apiKey.Plan.Name == PlanType.Enterprise)
+        if (apiKey.PlanName == PlanType.Enterprise)
         {
             await _next(context);
             return;
         }
 
-        var limit = apiKey.Plan.RequestsPerMinute;
+        var limit = apiKey.RequestsPerMinute;
         var result = await rateLimiter.CheckAsync(apiKey.Id.ToString(), limit, Window);
 
         context.Response.Headers["X-RateLimit-Limit"] = limit.ToString();

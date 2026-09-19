@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Moq;
 using SecureGate.Api.Middleware;
 using SecureGate.Application.Interfaces;
-using SecureGate.Domain.Entities;
 using SecureGate.Domain.Enums;
 using Xunit;
 
@@ -25,7 +24,7 @@ public class RateLimitMiddlewareTests
         return new RateLimitMiddleware(next);
     }
 
-    private static DefaultHttpContext CreateProxyContext(ApiKey? apiKey)
+    private static DefaultHttpContext CreateProxyContext(CachedApiKey? apiKey)
     {
         var context = new DefaultHttpContext();
         context.Request.Path = "/proxy";
@@ -37,11 +36,8 @@ public class RateLimitMiddlewareTests
         return context;
     }
 
-    private static ApiKey ApiKeyWithPlan(PlanType planType, int requestsPerMinute) => new()
-    {
-        Status = KeyStatus.Active,
-        Plan = new Plan { Name = planType, RequestsPerMinute = requestsPerMinute }
-    };
+    private static CachedApiKey CachedKey(PlanType planName, int requestsPerMinute) =>
+        new(Guid.NewGuid(), planName, requestsPerMinute);
 
     [Fact]
     public async Task NonProxyPath_NextCalled_LimiterNotCalled()
@@ -62,7 +58,7 @@ public class RateLimitMiddlewareTests
     public async Task EnterprisePlan_NextCalled_LimiterNotCalled()
     {
         var middleware = CreateMiddleware();
-        var context = CreateProxyContext(ApiKeyWithPlan(PlanType.Enterprise, int.MaxValue));
+        var context = CreateProxyContext(CachedKey(PlanType.Enterprise, int.MaxValue));
 
         await middleware.InvokeAsync(context, _rateLimiterMock.Object);
 
@@ -76,7 +72,7 @@ public class RateLimitMiddlewareTests
     public async Task UnderLimit_NextCalled_RateLimitHeadersSet()
     {
         var middleware = CreateMiddleware();
-        var context = CreateProxyContext(ApiKeyWithPlan(PlanType.Free, 10));
+        var context = CreateProxyContext(CachedKey(PlanType.Free, 10));
 
         _rateLimiterMock
             .Setup(r => r.CheckAsync(It.IsAny<string>(), 10, It.IsAny<TimeSpan>()))
@@ -93,7 +89,7 @@ public class RateLimitMiddlewareTests
     public async Task OverLimit_429Returned_RetryAfterSet_NextNotCalled()
     {
         var middleware = CreateMiddleware();
-        var context = CreateProxyContext(ApiKeyWithPlan(PlanType.Free, 10));
+        var context = CreateProxyContext(CachedKey(PlanType.Free, 10));
 
         _rateLimiterMock
             .Setup(r => r.CheckAsync(It.IsAny<string>(), 10, It.IsAny<TimeSpan>()))

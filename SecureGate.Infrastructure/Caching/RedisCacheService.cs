@@ -53,4 +53,16 @@ public sealed class RedisCacheService : ICacheService
             _logger.LogWarning(ex, "Cache write failed for key {CacheKey}; continuing without caching.", key);
         }
     }
+
+    public async Task RemoveAsync(string key, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _cache.RemoveAsync(key, cancellationToken);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "Cache remove failed for key {CacheKey}.", key);
+        }
+    }
 }
