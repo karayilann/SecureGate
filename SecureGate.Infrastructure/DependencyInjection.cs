@@ -3,8 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Interfaces;
-using SecureGate.Infrastructure.Persistence;
 using SecureGate.Infrastructure.Backend;
+using SecureGate.Infrastructure.Caching;
+using SecureGate.Infrastructure.Persistence;
 using SecureGate.Infrastructure.Persistence.Repositories;
 using SecureGate.Infrastructure.RateLimiting;
 using StackExchange.Redis;
@@ -30,6 +31,8 @@ public static class DependencyInjection
         services.AddSingleton<IRateLimiter, RedisRateLimiter>();
 
         services.AddScoped<IBackendService, MockBackendService>();
+
+        services.AddScoped<ICacheService, RedisCacheService>();
 
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();

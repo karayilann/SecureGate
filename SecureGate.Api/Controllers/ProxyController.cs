@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using SecureGate.Application.Features.Proxy.Queries.ProxyRequest;
@@ -17,7 +18,13 @@ public class ProxyController : ControllerBase
     [ProducesResponseType(typeof(BackendResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> Get([FromQuery] string resource)
     {
+        var stopwatch = Stopwatch.StartNew();
         var result = await _mediator.Send(new ProxyRequestQuery(resource));
-        return Ok(result);
+        stopwatch.Stop();
+
+        Response.Headers["X-Cache"] = result.FromCache ? "HIT" : "MISS";
+        Response.Headers["X-Response-Time-Ms"] = stopwatch.ElapsedMilliseconds.ToString();
+
+        return Ok(result.Response);
     }
 }

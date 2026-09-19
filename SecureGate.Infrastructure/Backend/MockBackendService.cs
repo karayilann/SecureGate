@@ -17,7 +17,7 @@ public sealed class MockBackendService : IBackendService
 
         var payloadSizeBytes = 1_000_000 + DeterministicSeed(resource);
 
-        return new BackendResponse(resource, payloadSizeBytes);
+        return new BackendResponse(resource, payloadSizeBytes, DateTime.UtcNow);
     }
 
     private static long DeterministicSeed(string resource)
