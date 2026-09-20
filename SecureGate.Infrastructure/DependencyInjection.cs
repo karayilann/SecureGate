@@ -9,6 +9,7 @@ using SecureGate.Infrastructure.Caching;
 using SecureGate.Infrastructure.Persistence;
 using SecureGate.Infrastructure.Persistence.Repositories;
 using SecureGate.Infrastructure.RateLimiting;
+using SecureGate.Infrastructure.Security;
 using StackExchange.Redis;
 
 namespace SecureGate.Infrastructure;
@@ -34,6 +35,7 @@ public static class DependencyInjection
         services.AddScoped<IBackendService, MockBackendService>();
 
         services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
 
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();
