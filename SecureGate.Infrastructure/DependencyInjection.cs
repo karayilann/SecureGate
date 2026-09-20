@@ -36,9 +36,11 @@ public static class DependencyInjection
 
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
         services.AddScoped<IApiKeyRepository, ApiKeyRepository>();
         services.AddScoped<IPlanRepository, PlanRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IUsageRepository, UsageRepository>();
         services.AddScoped<IAnomalyLogRepository, AnomalyLogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();

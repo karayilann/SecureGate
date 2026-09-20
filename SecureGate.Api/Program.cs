@@ -1,4 +1,5 @@
 using Microsoft.OpenApi;
+using SecureGate.Api.Extensions;
 using SecureGate.Api.Middleware;
 using SecureGate.Application;
 using SecureGate.Infrastructure;
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -37,6 +39,7 @@ if (app.Environment.IsDevelopment())
 app.UseSecureGatePipeline();
 
 app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
