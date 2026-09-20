@@ -1,3 +1,4 @@
+using SecureGate.Application.Common;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Enums;
 using SecureGate.Domain.Interfaces;
@@ -37,7 +38,7 @@ public class ApiKeyAuthMiddleware
             return;
         }
 
-        var cacheKey = $"apikey:{keyValue}";
+        var cacheKey = CacheKeys.ApiKey(keyValue!);
         var entry = await cacheService.GetAsync<ApiKeyCacheEntry>(cacheKey);
 
         if (entry is null)

@@ -22,9 +22,20 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Proxy uc noktalari icin API anahtari"
     });
 
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Admin JWT token"
+    });
+
     options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
     {
-        [new OpenApiSecuritySchemeReference("ApiKey", document)] = new List<string>()
+        [new OpenApiSecuritySchemeReference("ApiKey", document)] = new List<string>(),
+        [new OpenApiSecuritySchemeReference("Bearer", document)] = new List<string>()
     });
 });
 

@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using SecureGate.Application.Common;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Entities;
 using SecureGate.Domain.Enums;
@@ -77,7 +78,7 @@ public class AnomalyDetectionWorker : BackgroundService
             });
 
             await unitOfWork.SaveChangesAsync(cancellationToken);
-            await cacheService.RemoveAsync($"apikey:{apiKey.KeyValue}", cancellationToken);
+            await cacheService.RemoveAsync(CacheKeys.ApiKey(apiKey.KeyValue), cancellationToken);
 
             _logger.LogWarning("API key {ApiKeyId} suspended by anomaly detection: {Reason}", apiKey.Id, anomaly.Reason);
         }
