@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SecureGate.Application.DTOs;
+using SecureGate.Application.Features.ApiKeys.Commands.ActivateKey;
 using SecureGate.Application.Features.ApiKeys.Commands.ChangePlan;
 using SecureGate.Application.Features.ApiKeys.Commands.SuspendKey;
 using SecureGate.Domain.Enums;
@@ -32,6 +33,15 @@ public class AdminController : ControllerBase
     public async Task<IActionResult> Suspend(Guid id)
     {
         var result = await _mediator.Send(new SuspendKeyCommand(id));
+        return result is null ? NotFound() : Ok(result);
+    }
+
+    [HttpPatch("{id:guid}/activate")]
+    [ProducesResponseType(typeof(ApiKeyDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Activate(Guid id)
+    {
+        var result = await _mediator.Send(new ActivateKeyCommand(id));
         return result is null ? NotFound() : Ok(result);
     }
 }
