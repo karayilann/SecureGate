@@ -1,5 +1,6 @@
 using Microsoft.OpenApi;
 using SecureGate.Api.Extensions;
+using SecureGate.Api.HealthChecks;
 using SecureGate.Api.Middleware;
 using SecureGate.Application;
 using SecureGate.Application.Anomaly;
@@ -11,6 +12,10 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.Configure<AnomalyOptions>(builder.Configuration.GetSection("Anomaly"));
+
+builder.Services.AddHealthChecks()
+    .AddCheck<SqlHealthCheck>("sql")
+    .AddCheck<RedisHealthCheck>("redis");
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -55,5 +60,6 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();

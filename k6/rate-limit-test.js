@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check } from 'k6';
+import { Counter } from 'k6/metrics';
 
 // Rate-limit proof: fire a burst on ONE Free-plan key (limit 10/min) and watch the
 // first ~10 requests return 200 and the rest 429.
@@ -9,6 +9,12 @@ import { check } from 'k6';
 
 const BASE_URL = __ENV.BASE_URL || 'http://localhost:5212';
 const API_KEY = __ENV.API_KEY;
+
+// Treat 200/429 as expected so http_req_failed reflects real errors only.
+http.setResponseCallback(http.expectedStatuses(200, 429));
+
+const allowed = new Counter('status_200_allowed');
+const rateLimited = new Counter('status_429_rate_limited');
 
 export const options = {
   scenarios: {
@@ -21,8 +27,6 @@ export default function () {
     headers: { 'X-Api-Key': API_KEY },
   });
 
-  check(res, {
-    'allowed (200)': (r) => r.status === 200,
-    'rate-limited (429)': (r) => r.status === 429,
-  });
+  if (res.status === 200) allowed.add(1);
+  else if (res.status === 429) rateLimited.add(1);
 }
