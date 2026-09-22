@@ -7,6 +7,7 @@ namespace SecureGate.Tests;
 
 public class AnomalyDetectorTests
 {
+    private const int DistinctIpThreshold = 10;
     private readonly AnomalyDetector _detector = new();
 
     private static UsageRecord Usage(Guid apiKeyId, string ip) => new()
@@ -28,7 +29,7 @@ public class AnomalyDetectorTests
     {
         var apiKeyId = Guid.NewGuid();
 
-        var result = _detector.Detect(UsageFromDistinctIps(apiKeyId, 9));
+        var result = _detector.Detect(UsageFromDistinctIps(apiKeyId, 9), DistinctIpThreshold);
 
         result.Should().BeEmpty();
     }
@@ -38,7 +39,7 @@ public class AnomalyDetectorTests
     {
         var apiKeyId = Guid.NewGuid();
 
-        var result = _detector.Detect(UsageFromDistinctIps(apiKeyId, 10));
+        var result = _detector.Detect(UsageFromDistinctIps(apiKeyId, 10), DistinctIpThreshold);
 
         result.Should().ContainSingle();
         result.Single().ApiKeyId.Should().Be(apiKeyId);
@@ -51,7 +52,7 @@ public class AnomalyDetectorTests
         var apiKeyId = Guid.NewGuid();
         var records = Enumerable.Range(0, 30).Select(i => Usage(apiKeyId, $"10.0.0.{i % 5}"));
 
-        var result = _detector.Detect(records);
+        var result = _detector.Detect(records, DistinctIpThreshold);
 
         result.Should().BeEmpty();
     }
@@ -65,7 +66,7 @@ public class AnomalyDetectorTests
             .Concat(UsageFromDistinctIps(normalKey, 3))
             .ToList();
 
-        var result = _detector.Detect(records);
+        var result = _detector.Detect(records, DistinctIpThreshold);
 
         result.Should().ContainSingle();
         result.Single().ApiKeyId.Should().Be(suspiciousKey);

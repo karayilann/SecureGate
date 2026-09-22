@@ -5,14 +5,12 @@ namespace SecureGate.Application.Anomaly;
 
 public sealed class AnomalyDetector : IAnomalyDetector
 {
-    private const int DistinctIpThreshold = 10;
-
     /// <summary>
-    /// Flags a key when it was used from at least <c>DistinctIpThreshold</c> different IP addresses within
-    /// the records it is given (the caller narrows those to the detection window). Pure and side-effect free
-    /// so it can be unit tested with fabricated records.
+    /// Flags a key when it was used from at least <paramref name="distinctIpThreshold"/> different IP
+    /// addresses within the records it is given (the caller narrows those to the detection window). Pure and
+    /// side-effect free so it can be unit tested with fabricated records.
     /// </summary>
-    public IReadOnlyCollection<AnomalyResult> Detect(IEnumerable<UsageRecord> records)
+    public IReadOnlyCollection<AnomalyResult> Detect(IEnumerable<UsageRecord> records, int distinctIpThreshold)
     {
         return records
             .GroupBy(record => record.ApiKeyId)
@@ -21,7 +19,7 @@ public sealed class AnomalyDetector : IAnomalyDetector
                 ApiKeyId = group.Key,
                 DistinctIpCount = group.Select(record => record.IpAddress).Distinct().Count()
             })
-            .Where(candidate => candidate.DistinctIpCount >= DistinctIpThreshold)
+            .Where(candidate => candidate.DistinctIpCount >= distinctIpThreshold)
             .Select(candidate => new AnomalyResult(
                 candidate.ApiKeyId,
                 candidate.DistinctIpCount,

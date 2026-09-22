@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SecureGate.Application.Anomaly;
 using SecureGate.Application.Common;
 using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Entities;
@@ -13,13 +15,20 @@ public class AnomalyDetectionWorker : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<AnomalyDetectionWorker> _logger;
-    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(3);
-    private static readonly TimeSpan Window = TimeSpan.FromMinutes(5);
+    private readonly TimeSpan _interval;
+    private readonly TimeSpan _window;
+    private readonly int _distinctIpThreshold;
 
-    public AnomalyDetectionWorker(IServiceScopeFactory scopeFactory, ILogger<AnomalyDetectionWorker> logger)
+    public AnomalyDetectionWorker(
+        IServiceScopeFactory scopeFactory,
+        ILogger<AnomalyDetectionWorker> logger,
+        IOptions<AnomalyOptions> options)
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
+        _interval = TimeSpan.FromSeconds(options.Value.ScanIntervalSeconds);
+        _window = TimeSpan.FromMinutes(options.Value.WindowMinutes);
+        _distinctIpThreshold = options.Value.DistinctIpThreshold;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,7 +44,7 @@ public class AnomalyDetectionWorker : BackgroundService
                 _logger.LogError(ex, "Anomaly detection scan failed.");
             }
 
-            await Task.Delay(Interval, stoppingToken);
+            await Task.Delay(_interval, stoppingToken);
         }
     }
 
@@ -55,9 +64,9 @@ public class AnomalyDetectionWorker : BackgroundService
         var cacheService = provider.GetRequiredService<ICacheService>();
         var detector = provider.GetRequiredService<IAnomalyDetector>();
 
-        var since = DateTime.UtcNow - Window;
+        var since = DateTime.UtcNow - _window;
         var records = await usageRepository.GetRecentAsync(since);
-        var anomalies = detector.Detect(records);
+        var anomalies = detector.Detect(records, _distinctIpThreshold);
 
         foreach (var anomaly in anomalies)
         {
