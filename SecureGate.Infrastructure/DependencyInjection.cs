@@ -37,6 +37,7 @@ public static class DependencyInjection
             new ResilientBackendService(sp.GetRequiredService<MockBackendService>()));
 
         services.AddScoped<ICacheService, RedisCacheService>();
+        services.AddSingleton<IKeyedLock, KeyedLock>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 

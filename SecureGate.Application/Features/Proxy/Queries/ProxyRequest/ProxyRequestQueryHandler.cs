@@ -7,18 +7,24 @@ public class ProxyRequestQueryHandler : IRequestHandler<ProxyRequestQuery, Proxy
 {
     private readonly IBackendService _backendService;
     private readonly ICacheService _cacheService;
+    private readonly IKeyedLock _keyedLock;
     private static readonly TimeSpan CacheTtl = TimeSpan.FromMinutes(5);
 
-    public ProxyRequestQueryHandler(IBackendService backendService, ICacheService cacheService)
+    public ProxyRequestQueryHandler(
+        IBackendService backendService,
+        ICacheService cacheService,
+        IKeyedLock keyedLock)
     {
         _backendService = backendService;
         _cacheService = cacheService;
+        _keyedLock = keyedLock;
     }
 
     /// <summary>
-    /// Cache-aside: a hit returns the stored response (carrying its original GeneratedAtUtc, which is how
-    /// a caller can tell the answer came from cache); a miss calls the slow backend once, stores the
-    /// result under a TTL, and returns it.
+    /// Cache-aside with stampede protection: a hit returns immediately; on a miss only one request per
+    /// resource passes the keyed lock and calls the slow backend, while the rest wait and then read the
+    /// value it stored. The second cache check inside the lock is the double-check that lets those waiters
+    /// return the freshly cached response instead of all hitting the backend at once.
     /// </summary>
     public async Task<ProxyResult> Handle(ProxyRequestQuery request, CancellationToken cancellationToken)
     {
@@ -30,9 +36,18 @@ public class ProxyRequestQueryHandler : IRequestHandler<ProxyRequestQuery, Proxy
             return new ProxyResult(cached, true);
         }
 
-        var response = await _backendService.FetchAsync(request.Resource, cancellationToken);
-        await _cacheService.SetAsync(cacheKey, response, CacheTtl, cancellationToken);
+        using (await _keyedLock.AcquireAsync(cacheKey, cancellationToken))
+        {
+            cached = await _cacheService.GetAsync<BackendResponse>(cacheKey, cancellationToken);
+            if (cached is not null)
+            {
+                return new ProxyResult(cached, true);
+            }
 
-        return new ProxyResult(response, false);
+            var response = await _backendService.FetchAsync(request.Resource, cancellationToken);
+            await _cacheService.SetAsync(cacheKey, response, CacheTtl, cancellationToken);
+
+            return new ProxyResult(response, false);
+        }
     }
 }

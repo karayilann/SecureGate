@@ -2,6 +2,7 @@ using FluentAssertions;
 using Moq;
 using SecureGate.Application.Features.Proxy.Queries.ProxyRequest;
 using SecureGate.Application.Interfaces;
+using SecureGate.Infrastructure.Caching;
 using Xunit;
 
 namespace SecureGate.Tests;
@@ -11,7 +12,7 @@ public class ProxyRequestQueryHandlerTests
     private readonly Mock<IBackendService> _backendMock = new();
     private readonly Mock<ICacheService> _cacheMock = new();
 
-    private ProxyRequestQueryHandler CreateHandler() => new(_backendMock.Object, _cacheMock.Object);
+    private ProxyRequestQueryHandler CreateHandler() => new(_backendMock.Object, _cacheMock.Object, new KeyedLock());
 
     [Fact]
     public async Task CacheMiss_CallsBackendOnce_StoresInCache_FromCacheFalse()
