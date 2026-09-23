@@ -5,6 +5,7 @@ using SecureGate.Application.DTOs;
 using SecureGate.Application.Features.ApiKeys.Commands.ActivateKey;
 using SecureGate.Application.Features.ApiKeys.Commands.ChangePlan;
 using SecureGate.Application.Features.ApiKeys.Commands.SuspendKey;
+using SecureGate.Application.Features.ApiKeys.Queries.GetAllApiKeys;
 using SecureGate.Domain.Enums;
 
 namespace SecureGate.Api.Controllers;
@@ -17,6 +18,14 @@ public class AdminController : ControllerBase
     private readonly IMediator _mediator;
 
     public AdminController(IMediator mediator) => _mediator = mediator;
+
+    [HttpGet]
+    [ProducesResponseType(typeof(IReadOnlyList<ApiKeyListItemDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _mediator.Send(new GetAllApiKeysQuery());
+        return Ok(result);
+    }
 
     [HttpPatch("{id:guid}/plan")]
     [ProducesResponseType(typeof(ApiKeyDto), StatusCodes.Status200OK)]

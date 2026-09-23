@@ -17,6 +17,9 @@ namespace SecureGate.Infrastructure.Persistence.Repositories
 
         public async Task<ApiKey?> GetByKeyValueAsync(string keyValue) => await _context.ApiKeys.Include(x => x.Plan).FirstOrDefaultAsync(x => x.KeyValue == keyValue);
 
+        public async Task<List<ApiKey>> GetAllAsync() =>
+            await _context.ApiKeys.Include(x => x.Plan).OrderByDescending(x => x.CreatedAt).ToListAsync();
+
         public Task UpdateAsync(ApiKey apiKey)
         {
             _context.ApiKeys.Update(apiKey);
