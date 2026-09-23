@@ -21,6 +21,20 @@ builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.Configure<AnomalyOptions>(builder.Configuration.GetSection("Anomaly"));
 builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimit"));
 
+var corsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+    {
+        if (corsOrigins is { Length: > 0 })
+        {
+            policy.WithOrigins(corsOrigins).AllowAnyHeader().AllowAnyMethod();
+        }
+        else
+        {
+            policy.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        }
+    }));
+
 builder.Services.AddHealthChecks()
     .AddCheck<SqlHealthCheck>("sql")
     .AddCheck<RedisHealthCheck>("redis");
@@ -59,6 +73,9 @@ var app = builder.Build();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseSerilogRequestLogging();
 
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -68,6 +85,7 @@ if (app.Environment.IsDevelopment())
 app.UseSecureGatePipeline();
 
 app.UseHttpsRedirection();
+app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
