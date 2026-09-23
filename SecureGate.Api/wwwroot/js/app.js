@@ -16,6 +16,12 @@ function showDashboard() {
 function navigate(page) {
     document.querySelectorAll(".nav-btn").forEach(b =>
         b.classList.toggle("active", b.dataset.page === page));
+
+    if (page === "keys") {
+        renderKeysPage(content);
+        return;
+    }
+
     content.innerHTML = `<div class="placeholder">"${page}" sayfası yakında.</div>`;
 }
 

@@ -1,4 +1,5 @@
 using MediatR;
+using SecureGate.Application.Common;
 using SecureGate.Application.DTOs;
 using SecureGate.Domain.Interfaces;
 
@@ -17,13 +18,10 @@ public class GetAllApiKeysQueryHandler : IRequestHandler<GetAllApiKeysQuery, IRe
         return keys.Select(key => new ApiKeyListItemDto
         {
             Id = key.Id,
-            MaskedKeyValue = Mask(key.KeyValue),
+            MaskedKeyValue = KeyMasking.Mask(key.KeyValue),
             PlanName = key.Plan?.Name.ToString() ?? string.Empty,
             Status = key.Status.ToString(),
             CreatedAt = key.CreatedAt
         }).ToList();
     }
-
-    private static string Mask(string keyValue) =>
-        keyValue.Length <= 8 ? new string('*', keyValue.Length) : $"{keyValue[..4]}…{keyValue[^4..]}";
 }

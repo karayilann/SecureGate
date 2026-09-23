@@ -12,6 +12,13 @@ public class AnomalyLogRepository : IAnomalyLogRepository
 
     public async Task AddAsync(AnomalyLog entity) => await _context.AnomalyLogs.AddAsync(entity);
 
+    public async Task<List<AnomalyLog>> GetRecentAsync(int take) =>
+        await _context.AnomalyLogs
+            .Include(x => x.ApiKey)
+            .OrderByDescending(x => x.DetectedAt)
+            .Take(take)
+            .ToListAsync();
+
     public async Task<AnomalyLog?> GetByIdAsync(Guid id) =>
         await _context.AnomalyLogs.FirstOrDefaultAsync(x => x.Id == id);
 
