@@ -38,15 +38,19 @@ public class AnomalyDetectionWorker : BackgroundService
             try
             {
                 await ScanForAnomaliesAsync(stoppingToken);
+                await Task.Delay(_interval, stoppingToken);
             }
-            catch (Exception ex) when (ex is not OperationCanceledException)
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                break;
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Anomaly detection scan failed.");
             }
-
-            await Task.Delay(_interval, stoppingToken);
         }
     }
+
 
     /// <summary>
     /// A background service is a singleton, so scoped services (DbContext, repositories, cache) must be
