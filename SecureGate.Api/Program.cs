@@ -19,6 +19,7 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddJwtAuthentication(builder.Configuration);
 builder.Services.Configure<AnomalyOptions>(builder.Configuration.GetSection("Anomaly"));
+builder.Services.Configure<IpRateLimitOptions>(builder.Configuration.GetSection("IpRateLimit"));
 
 builder.Services.AddHealthChecks()
     .AddCheck<SqlHealthCheck>("sql")

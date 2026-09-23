@@ -1,3 +1,4 @@
+using SecureGate.Api.Extensions;
 using SecureGate.Domain.Entities;
 using SecureGate.Domain.Interfaces;
 
@@ -6,7 +7,6 @@ namespace SecureGate.Api.Middleware;
 public class UsageLoggingMiddleware
 {
     private readonly RequestDelegate _next;
-    private const string ForwardedForHeader = "X-Forwarded-For";
 
     public UsageLoggingMiddleware(RequestDelegate next) => _next = next;
 
@@ -27,23 +27,12 @@ public class UsageLoggingMiddleware
             var usage = new UsageRecord
             {
                 ApiKeyId = apiKey.Id,
-                IpAddress = ResolveIpAddress(context),
+                IpAddress = context.GetClientIp(),
                 Endpoint = context.Request.Path
             };
 
             await usageRepository.AddAsync(usage);
             await unitOfWork.SaveChangesAsync(context.RequestAborted);
         }
-    }
-
-    private static string ResolveIpAddress(HttpContext context)
-    {
-        if (context.Request.Headers.TryGetValue(ForwardedForHeader, out var forwarded) &&
-            !string.IsNullOrWhiteSpace(forwarded))
-        {
-            return forwarded.ToString().Split(',')[0].Trim();
-        }
-
-        return context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
     }
 }

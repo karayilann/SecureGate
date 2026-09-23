@@ -10,6 +10,7 @@ public static class MiddlewareExtensions
     public static IApplicationBuilder UseSecureGatePipeline(this IApplicationBuilder app)
     {
         app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.UseMiddleware<IpRateLimitMiddleware>();
         app.UseMiddleware<ApiKeyAuthMiddleware>();
         app.UseMiddleware<RateLimitMiddleware>();
         app.UseMiddleware<UsageLoggingMiddleware>();
