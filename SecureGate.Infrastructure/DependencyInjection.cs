@@ -48,7 +48,11 @@ public static class DependencyInjection
         services.AddScoped<IAnomalyLogRepository, AnomalyLogRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+        services.AddSingleton<UsageQueue>();
+        services.AddSingleton<IUsageQueue>(sp => sp.GetRequiredService<UsageQueue>());
+
         services.AddHostedService<AnomalyDetectionWorker>();
+        services.AddHostedService<UsageFlushWorker>();
 
         return services;
     }

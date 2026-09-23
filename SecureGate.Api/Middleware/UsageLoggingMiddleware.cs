@@ -1,6 +1,6 @@
 using SecureGate.Api.Extensions;
+using SecureGate.Application.Interfaces;
 using SecureGate.Domain.Entities;
-using SecureGate.Domain.Interfaces;
 
 namespace SecureGate.Api.Middleware;
 
@@ -11,12 +11,11 @@ public class UsageLoggingMiddleware
     public UsageLoggingMiddleware(RequestDelegate next) => _next = next;
 
     /// <summary>
-    /// Records one usage row per authorized proxy request. It runs after auth and rate limiting, so only
-    /// requests that passed both are logged. The IP is taken from X-Forwarded-For first (the load test and
-    /// real deployments sit behind a proxy) and falls back to the socket address, which is what the anomaly
-    /// worker later scans for "too many distinct IPs on one key".
+    /// Records one usage row per successful proxy request. It runs after auth and rate limiting, so only
+    /// requests that passed both are logged. The record is handed to an in-memory queue and persisted by a
+    /// background flush worker, keeping the SQL write off the request's hot path.
     /// </summary>
-    public async Task InvokeAsync(HttpContext context, IUsageRepository usageRepository, IUnitOfWork unitOfWork)
+    public async Task InvokeAsync(HttpContext context, IUsageQueue usageQueue)
     {
         await _next(context);
 
@@ -24,15 +23,12 @@ public class UsageLoggingMiddleware
             context.Response.StatusCode == StatusCodes.Status200OK &&
             context.Items["ApiKey"] is CachedApiKey apiKey)
         {
-            var usage = new UsageRecord
+            usageQueue.TryEnqueue(new UsageRecord
             {
                 ApiKeyId = apiKey.Id,
                 IpAddress = context.GetClientIp(),
                 Endpoint = context.Request.Path
-            };
-
-            await usageRepository.AddAsync(usage);
-            await unitOfWork.SaveChangesAsync(context.RequestAborted);
+            });
         }
     }
 }
