@@ -5,8 +5,15 @@ using SecureGate.Api.Middleware;
 using SecureGate.Application;
 using SecureGate.Application.Anomaly;
 using SecureGate.Infrastructure;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, config) => config
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj} <{CorrelationId}>{NewLine}{Exception}"));
 
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
@@ -47,6 +54,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 var app = builder.Build();
+
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseSerilogRequestLogging();
 
 if (app.Environment.IsDevelopment())
 {
