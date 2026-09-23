@@ -32,7 +32,9 @@ public static class DependencyInjection
 
         services.AddSingleton<IRateLimiter, RedisRateLimiter>();
 
-        services.AddScoped<IBackendService, MockBackendService>();
+        services.AddSingleton<MockBackendService>();
+        services.AddSingleton<IBackendService>(sp =>
+            new ResilientBackendService(sp.GetRequiredService<MockBackendService>()));
 
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddSingleton<IPasswordHasher, Pbkdf2PasswordHasher>();
