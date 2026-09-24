@@ -105,3 +105,83 @@ async function onKeyAction(e) {
         showToast("İşlem başarısız.", "error");
     }
 }
+
+let usageChartInstances = [];
+
+function destroyUsageCharts() {
+    usageChartInstances.forEach(c => c.destroy());
+    usageChartInstances = [];
+}
+
+function chartOptions() {
+    return {
+        responsive: true,
+        plugins: { legend: { labels: { color: "#e2e8f0" } } },
+        scales: {
+            x: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" } },
+            y: { ticks: { color: "#94a3b8" }, grid: { color: "#334155" }, beginAtZero: true }
+        }
+    };
+}
+
+async function renderUsagePage(container) {
+    destroyUsageCharts();
+    container.innerHTML = `
+        <div class="page-head"><h2>Usage (son 24 saat)</h2></div>
+        <div class="charts">
+            <div class="chart-card"><h3>İstek / Saat</h3><canvas id="timeline-chart"></canvas></div>
+            <div class="chart-card"><h3>Key Başına İstek</h3><canvas id="perkey-chart"></canvas></div>
+        </div>`;
+
+    try {
+        const res = await apiFetch("/api/admin/usage");
+        const stats = await res.json();
+
+        usageChartInstances.push(new Chart(document.getElementById("timeline-chart"), {
+            type: "line",
+            data: {
+                labels: stats.timeline.map(p => new Date(p.bucket).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })),
+                datasets: [{ label: "İstek", data: stats.timeline.map(p => p.count), borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,.2)", fill: true, tension: .3 }]
+            },
+            options: chartOptions()
+        }));
+
+        usageChartInstances.push(new Chart(document.getElementById("perkey-chart"), {
+            type: "bar",
+            data: {
+                labels: stats.perKey.map(k => k.maskedKeyValue),
+                datasets: [{ label: "İstek", data: stats.perKey.map(k => k.count), backgroundColor: "#818cf8" }]
+            },
+            options: chartOptions()
+        }));
+    } catch {
+        showToast("Kullanım verisi yüklenemedi.", "error");
+    }
+}
+
+async function renderAnomaliesPage(container) {
+    container.innerHTML = `
+        <div class="page-head"><h2>Anomaliler</h2></div>
+        <table>
+            <thead><tr><th>Key</th><th>Sebep</th><th>Farklı IP</th><th>Tarih</th></tr></thead>
+            <tbody id="anomalies-body"><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+        </table>`;
+
+    const body = document.getElementById("anomalies-body");
+    try {
+        const res = await apiFetch("/api/admin/anomalies");
+        const logs = await res.json();
+        if (!logs.length) {
+            body.innerHTML = `<tr><td colspan="4" class="muted">Anomali kaydı yok.</td></tr>`;
+            return;
+        }
+        body.innerHTML = logs.map(l => `<tr>
+            <td><code>${l.maskedKeyValue || l.apiKeyId}</code></td>
+            <td>${l.reason}</td>
+            <td>${l.distinctIpCount}</td>
+            <td>${new Date(l.detectedAt).toLocaleString("tr-TR")}</td>
+        </tr>`).join("");
+    } catch {
+        body.innerHTML = `<tr><td colspan="4" class="error">Yüklenemedi.</td></tr>`;
+    }
+}

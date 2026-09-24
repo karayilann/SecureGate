@@ -196,4 +196,15 @@ th { color: var(--muted); font-weight: 600; }
 .actions { display: flex; gap: .5rem; align-items: center; }
 .muted { color: var(--muted); }
 
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }
+
+.chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+}
+.chart-card h3 { margin: 0 0 .75rem; font-size: .95rem; color: var(--muted); }
+
 code { background: var(--surface-2); padding: .1rem .35rem; border-radius: 4px; font-size: .85rem; }

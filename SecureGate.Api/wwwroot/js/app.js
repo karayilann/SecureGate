@@ -21,6 +21,14 @@ function navigate(page) {
         renderKeysPage(content);
         return;
     }
+    if (page === "usage") {
+        renderUsagePage(content);
+        return;
+    }
+    if (page === "anomalies") {
+        renderAnomaliesPage(content);
+        return;
+    }
 
     content.innerHTML = `<div class="placeholder">"${page}" sayfası yakında.</div>`;
 }
