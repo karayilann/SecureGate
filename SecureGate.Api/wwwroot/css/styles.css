@@ -223,6 +223,30 @@ th { color: var(--muted); font-weight: 600; }
     word-break: break-word;
 }
 
+.health-overall {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+.health-overall .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.health-overall.ok .dot { background: var(--success); }
+.health-overall.bad .dot { background: var(--danger); }
+
+.health-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+.health-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    align-items: flex-start;
+}
+.health-name { font-weight: 700; letter-spacing: .03em; }
+
 @media (max-width: 600px) {
     .topbar { flex-wrap: wrap; }
     .topbar nav { order: 3; width: 100%; overflow-x: auto; }

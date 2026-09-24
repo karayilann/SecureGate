@@ -17,9 +17,9 @@ function showToast(message, type = "info") {
 async function copyToClipboard(text) {
     try {
         await navigator.clipboard.writeText(text);
-        showToast("Panoya kopyalandı.", "success");
+        showToast("Copied to clipboard.", "success");
     } catch {
-        showToast("Kopyalanamadı.", "error");
+        showToast("Copy failed.", "error");
     }
 }
 
@@ -27,4 +27,3 @@ function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, c =>
         ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
-

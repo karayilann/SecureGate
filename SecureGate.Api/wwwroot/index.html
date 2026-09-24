@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -14,13 +14,13 @@
             <label>Email
                 <input id="email" type="email" value="admin@securegate.local" required />
             </label>
-            <label>Parola
+            <label>Password
                 <span class="password-field">
                     <input id="password" type="password" required />
-                    <button type="button" id="toggle-password" class="toggle" aria-label="Parolayı göster">👁</button>
+                    <button type="button" id="toggle-password" class="toggle" aria-label="Show password">👁</button>
                 </span>
             </label>
-            <button type="submit">Giriş Yap</button>
+            <button type="submit">Sign In</button>
             <p id="login-error" class="error" hidden></p>
         </form>
     </section>
@@ -32,9 +32,10 @@
                 <button class="nav-btn active" data-page="keys">Keys</button>
                 <button class="nav-btn" data-page="usage">Usage</button>
                 <button class="nav-btn" data-page="anomalies">Anomalies</button>
+                <button class="nav-btn" data-page="health">Health</button>
                 <button class="nav-btn" data-page="playground">Playground</button>
             </nav>
-            <button id="logout" class="ghost">Çıkış</button>
+            <button id="logout" class="ghost">Logout</button>
         </header>
         <main id="content" class="content"></main>
     </section>

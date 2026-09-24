@@ -29,12 +29,16 @@ function navigate(page) {
         renderAnomaliesPage(content);
         return;
     }
+    if (page === "health") {
+        renderHealthPage(content);
+        return;
+    }
     if (page === "playground") {
         renderPlaygroundPage(content);
         return;
     }
 
-    content.innerHTML = `<div class="placeholder">"${page}" sayfası yakında.</div>`;
+    content.innerHTML = `<div class="placeholder">"${page}" page coming soon.</div>`;
 }
 
 document.getElementById("login-form").addEventListener("submit", async (e) => {
@@ -50,11 +54,11 @@ document.getElementById("login-form").addEventListener("submit", async (e) => {
         if (ok) {
             showDashboard();
         } else {
-            errorEl.textContent = "Email veya parola hatalı.";
+            errorEl.textContent = "Invalid email or password.";
             errorEl.hidden = false;
         }
     } catch {
-        errorEl.textContent = "Bağlantı hatası.";
+        errorEl.textContent = "Connection error.";
         errorEl.hidden = false;
     }
 });
@@ -64,7 +68,7 @@ document.getElementById("toggle-password").addEventListener("click", (e) => {
     const show = input.type === "password";
     input.type = show ? "text" : "password";
     e.currentTarget.textContent = show ? "🙈" : "👁";
-    e.currentTarget.setAttribute("aria-label", show ? "Parolayı gizle" : "Parolayı göster");
+    e.currentTarget.setAttribute("aria-label", show ? "Hide password" : "Show password");
 });
 
 document.getElementById("logout").addEventListener("click", () => {

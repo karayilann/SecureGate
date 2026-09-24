@@ -7,6 +7,8 @@ const PLAN_OPTIONS = [
 // Seeded admin user; a real system would offer a user picker here.
 const DEFAULT_USER_ID = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa";
 
+/* ---------- Keys ---------- */
+
 async function renderKeysPage(container) {
     container.innerHTML = `
         <div class="page-head"><h2>API Keys</h2></div>
@@ -17,12 +19,12 @@ async function renderKeysPage(container) {
                     ${PLAN_OPTIONS.map(p => `<option value="${p.value}">${p.label}</option>`).join("")}
                 </select>
             </label>
-            <button type="submit">Oluştur</button>
+            <button type="submit">Create</button>
         </form>
         <div id="new-key-banner" class="banner" hidden></div>
         <table>
-            <thead><tr><th>Key</th><th>Plan</th><th>Durum</th><th>Aksiyonlar</th></tr></thead>
-            <tbody id="keys-body"><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+            <thead><tr><th>Key</th><th>Plan</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="keys-body"><tr><td colspan="4" class="muted">Loading…</td></tr></tbody>
         </table>`;
 
     document.getElementById("create-key").addEventListener("submit", onCreateKey);
@@ -35,14 +37,14 @@ async function loadKeys() {
         const res = await apiFetch("/api/admin/keys");
         const keys = await res.json();
         if (!keys.length) {
-            body.innerHTML = `<tr><td colspan="4" class="muted">Kayıt yok.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="4" class="muted">No records.</td></tr>`;
             return;
         }
         body.innerHTML = keys.map(renderKeyRow).join("");
         body.querySelectorAll("[data-action]").forEach(el =>
             el.addEventListener(el.tagName === "SELECT" ? "change" : "click", onKeyAction));
     } catch {
-        body.innerHTML = `<tr><td colspan="4" class="error">Liste yüklenemedi.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="4" class="error">Failed to load list.</td></tr>`;
     }
 }
 
@@ -72,15 +74,15 @@ async function onCreateKey(e) {
         const created = await res.json();
         const banner = document.getElementById("new-key-banner");
         banner.innerHTML = `
-            <span>Yeni key (bir daha gösterilmeyecek):</span>
+            <span>New key (shown once):</span>
             <code>${created.keyValue}</code>
-            <button type="button" class="small" id="copy-key">Kopyala</button>`;
+            <button type="button" class="small" id="copy-key">Copy</button>`;
         banner.hidden = false;
         document.getElementById("copy-key").addEventListener("click", () => copyToClipboard(created.keyValue));
-        showToast("Key oluşturuldu.", "success");
+        showToast("Key created.", "success");
         await loadKeys();
     } catch {
-        showToast("Key oluşturulamadı — User ID geçerli mi?", "error");
+        showToast("Key creation failed — is the User ID valid?", "error");
     }
 }
 
@@ -99,12 +101,14 @@ async function onKeyAction(e) {
         } else if (action === "activate") {
             await apiFetch(`/api/admin/keys/${id}/activate`, { method: "PATCH" });
         }
-        showToast("Güncellendi.", "success");
+        showToast("Updated.", "success");
         await loadKeys();
     } catch {
-        showToast("İşlem başarısız.", "error");
+        showToast("Action failed.", "error");
     }
 }
+
+/* ---------- Usage ---------- */
 
 let usageChartInstances = [];
 
@@ -127,10 +131,10 @@ function chartOptions() {
 async function renderUsagePage(container) {
     destroyUsageCharts();
     container.innerHTML = `
-        <div class="page-head"><h2>Usage (son 24 saat)</h2></div>
+        <div class="page-head"><h2>Usage (last 24 hours)</h2></div>
         <div class="charts">
-            <div class="chart-card"><h3>İstek / Saat</h3><canvas id="timeline-chart"></canvas></div>
-            <div class="chart-card"><h3>Key Başına İstek</h3><canvas id="perkey-chart"></canvas></div>
+            <div class="chart-card"><h3>Requests / Hour</h3><canvas id="timeline-chart"></canvas></div>
+            <div class="chart-card"><h3>Requests per Key</h3><canvas id="perkey-chart"></canvas></div>
         </div>`;
 
     try {
@@ -140,8 +144,8 @@ async function renderUsagePage(container) {
         usageChartInstances.push(new Chart(document.getElementById("timeline-chart"), {
             type: "line",
             data: {
-                labels: stats.timeline.map(p => new Date(p.bucket).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })),
-                datasets: [{ label: "İstek", data: stats.timeline.map(p => p.count), borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,.2)", fill: true, tension: .3 }]
+                labels: stats.timeline.map(p => new Date(p.bucket).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })),
+                datasets: [{ label: "Requests", data: stats.timeline.map(p => p.count), borderColor: "#38bdf8", backgroundColor: "rgba(56,189,248,.2)", fill: true, tension: .3 }]
             },
             options: chartOptions()
         }));
@@ -150,21 +154,23 @@ async function renderUsagePage(container) {
             type: "bar",
             data: {
                 labels: stats.perKey.map(k => k.maskedKeyValue),
-                datasets: [{ label: "İstek", data: stats.perKey.map(k => k.count), backgroundColor: "#818cf8" }]
+                datasets: [{ label: "Requests", data: stats.perKey.map(k => k.count), backgroundColor: "#818cf8" }]
             },
             options: chartOptions()
         }));
     } catch {
-        showToast("Kullanım verisi yüklenemedi.", "error");
+        showToast("Failed to load usage data.", "error");
     }
 }
 
+/* ---------- Anomalies ---------- */
+
 async function renderAnomaliesPage(container) {
     container.innerHTML = `
-        <div class="page-head"><h2>Anomaliler</h2></div>
+        <div class="page-head"><h2>Anomalies</h2></div>
         <table>
-            <thead><tr><th>Key</th><th>Sebep</th><th>Farklı IP</th><th>Tarih</th></tr></thead>
-            <tbody id="anomalies-body"><tr><td colspan="4" class="muted">Yükleniyor…</td></tr></tbody>
+            <thead><tr><th>Key</th><th>Reason</th><th>Distinct IPs</th><th>Detected</th></tr></thead>
+            <tbody id="anomalies-body"><tr><td colspan="4" class="muted">Loading…</td></tr></tbody>
         </table>`;
 
     const body = document.getElementById("anomalies-body");
@@ -172,27 +178,61 @@ async function renderAnomaliesPage(container) {
         const res = await apiFetch("/api/admin/anomalies");
         const logs = await res.json();
         if (!logs.length) {
-            body.innerHTML = `<tr><td colspan="4" class="muted">Anomali kaydı yok.</td></tr>`;
+            body.innerHTML = `<tr><td colspan="4" class="muted">No anomaly records.</td></tr>`;
             return;
         }
         body.innerHTML = logs.map(l => `<tr>
             <td><code>${l.maskedKeyValue || l.apiKeyId}</code></td>
             <td>${l.reason}</td>
             <td>${l.distinctIpCount}</td>
-            <td>${new Date(l.detectedAt).toLocaleString("tr-TR")}</td>
+            <td>${new Date(l.detectedAt).toLocaleString("en-US")}</td>
         </tr>`).join("");
     } catch {
-        body.innerHTML = `<tr><td colspan="4" class="error">Yüklenemedi.</td></tr>`;
+        body.innerHTML = `<tr><td colspan="4" class="error">Failed to load.</td></tr>`;
     }
 }
+
+/* ---------- Health ---------- */
+
+async function renderHealthPage(container) {
+    container.innerHTML = `
+        <div class="page-head"><h2>Health</h2><button id="health-refresh" class="ghost small">Refresh</button></div>
+        <div id="health-body"><div class="muted">Loading…</div></div>`;
+    document.getElementById("health-refresh").addEventListener("click", loadHealth);
+    await loadHealth();
+}
+
+async function loadHealth() {
+    const body = document.getElementById("health-body");
+    try {
+        const res = await fetch("/health");
+        const data = await res.json();
+        const overallOk = data.status === "Healthy";
+        const overall = `<div class="health-overall ${overallOk ? "ok" : "bad"}">
+            <span class="dot"></span> Overall: <strong>${data.status}</strong>
+            <span class="muted">(${Math.round(data.totalDurationMs)} ms)</span>
+        </div>`;
+        const cards = data.checks.map(c => `
+            <div class="health-card">
+                <div class="health-name">${c.name.toUpperCase()}</div>
+                <span class="badge ${c.status === "Healthy" ? "active" : "suspended"}">${c.status}</span>
+                <div class="muted">${c.description || ""} · ${Math.round(c.durationMs)} ms</div>
+            </div>`).join("");
+        body.innerHTML = overall + `<div class="health-cards">${cards}</div>`;
+    } catch {
+        body.innerHTML = `<div class="error">Health endpoint unavailable.</div>`;
+    }
+}
+
+/* ---------- Playground ---------- */
 
 function renderPlaygroundPage(container) {
     container.innerHTML = `
         <div class="page-head"><h2>Proxy Playground</h2></div>
         <form id="pg-form" class="card-inline">
-            <label>X-Api-Key <input id="pg-key" placeholder="key değeri" /></label>
+            <label>X-Api-Key <input id="pg-key" placeholder="key value" /></label>
             <label>resource <input id="pg-resource" value="report" /></label>
-            <button type="submit">Gönder</button>
+            <button type="submit">Send</button>
         </form>
         <div id="pg-result"></div>`;
 
@@ -204,7 +244,7 @@ async function onProxyPlaygroundSubmit(e) {
     const key = document.getElementById("pg-key").value.trim();
     const resource = document.getElementById("pg-resource").value.trim();
     const resultEl = document.getElementById("pg-result");
-    resultEl.innerHTML = `<div class="muted">Gönderiliyor…</div>`;
+    resultEl.innerHTML = `<div class="muted">Sending…</div>`;
 
     try {
         const res = await fetch(`/proxy?resource=${encodeURIComponent(resource)}`, {
@@ -224,9 +264,9 @@ async function onProxyPlaygroundSubmit(e) {
 
         resultEl.innerHTML = `
             <div class="pg-status ${res.ok ? "ok" : "bad"}">HTTP ${res.status}</div>
-            <table class="pg-headers">${headerRows || '<tr><td class="muted">Gösterilecek header yok</td></tr>'}</table>
+            <table class="pg-headers">${headerRows || '<tr><td class="muted">No headers to show</td></tr>'}</table>
             <pre class="pg-body">${escapeHtml(bodyText)}</pre>`;
     } catch {
-        resultEl.innerHTML = `<div class="error">İstek başarısız.</div>`;
+        resultEl.innerHTML = `<div class="error">Request failed.</div>`;
     }
 }
