@@ -185,3 +185,48 @@ async function renderAnomaliesPage(container) {
         body.innerHTML = `<tr><td colspan="4" class="error">Yüklenemedi.</td></tr>`;
     }
 }
+
+function renderPlaygroundPage(container) {
+    container.innerHTML = `
+        <div class="page-head"><h2>Proxy Playground</h2></div>
+        <form id="pg-form" class="card-inline">
+            <label>X-Api-Key <input id="pg-key" placeholder="key değeri" /></label>
+            <label>resource <input id="pg-resource" value="report" /></label>
+            <button type="submit">Gönder</button>
+        </form>
+        <div id="pg-result"></div>`;
+
+    document.getElementById("pg-form").addEventListener("submit", onProxyPlaygroundSubmit);
+}
+
+async function onProxyPlaygroundSubmit(e) {
+    e.preventDefault();
+    const key = document.getElementById("pg-key").value.trim();
+    const resource = document.getElementById("pg-resource").value.trim();
+    const resultEl = document.getElementById("pg-result");
+    resultEl.innerHTML = `<div class="muted">Gönderiliyor…</div>`;
+
+    try {
+        const res = await fetch(`/proxy?resource=${encodeURIComponent(resource)}`, {
+            headers: { "X-Api-Key": key }
+        });
+
+        const shown = ["X-Cache", "X-Response-Time-Ms", "X-RateLimit-Limit", "X-RateLimit-Remaining", "Retry-After"];
+        const headerRows = shown
+            .map(h => [h, res.headers.get(h.toLowerCase())])
+            .filter(([, v]) => v !== null)
+            .map(([h, v]) => `<tr><th>${h}</th><td><code>${escapeHtml(v)}</code></td></tr>`)
+            .join("");
+
+        let bodyText;
+        try { bodyText = JSON.stringify(await res.clone().json(), null, 2); }
+        catch { bodyText = await res.text(); }
+
+        resultEl.innerHTML = `
+            <div class="pg-status ${res.ok ? "ok" : "bad"}">HTTP ${res.status}</div>
+            <table class="pg-headers">${headerRows || '<tr><td class="muted">Gösterilecek header yok</td></tr>'}</table>
+            <pre class="pg-body">${escapeHtml(bodyText)}</pre>`;
+    } catch {
+        resultEl.innerHTML = `<div class="error">İstek başarısız.</div>`;
+    }
+}

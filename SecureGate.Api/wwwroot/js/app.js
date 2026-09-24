@@ -29,6 +29,10 @@ function navigate(page) {
         renderAnomaliesPage(content);
         return;
     }
+    if (page === "playground") {
+        renderPlaygroundPage(content);
+        return;
+    }
 
     content.innerHTML = `<div class="placeholder">"${page}" sayfası yakında.</div>`;
 }

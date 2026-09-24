@@ -207,4 +207,26 @@ th { color: var(--muted); font-weight: 600; }
 }
 .chart-card h3 { margin: 0 0 .75rem; font-size: .95rem; color: var(--muted); }
 
+.pg-status { font-weight: 700; margin: 1rem 0 .5rem; }
+.pg-status.ok { color: var(--success); }
+.pg-status.bad { color: var(--danger); }
+.pg-headers { width: auto; margin-bottom: 1rem; }
+.pg-headers th { width: 190px; }
+.pg-body {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: .85rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+@media (max-width: 600px) {
+    .topbar { flex-wrap: wrap; }
+    .topbar nav { order: 3; width: 100%; overflow-x: auto; }
+    .content { padding: 1rem; }
+}
+
 code { background: var(--surface-2); padding: .1rem .35rem; border-radius: 4px; font-size: .85rem; }
