@@ -109,10 +109,15 @@ flowchart TD
 - **Rate limit:** a burst on a Free key (10/min) returns ~10× `200` then `429 + Retry-After`.
 - **Anomaly detection:** hitting one key from many spoofed IPs auto‑suspends it mid‑run (subsequent requests → `401`) with an `AnomalyLog` entry.
 
-<!-- ![Cache HIT vs MISS](docs/cache.png) -->
-<!-- ![Rate limit k6](docs/ratelimit.png) -->
-<!-- ![Anomaly auto-suspend](docs/anomaly.png) -->
-<!-- ![Admin dashboard](docs/dashboard.png) -->
+![Cache HIT vs MISS](docs/cache.png)
+
+![Rate limit k6](docs/ratelimit.png)
+
+![Anomaly auto-suspend](docs/anomaly.png)
+
+![Admin dashboard](docs/dashboard.png)
+
+![Health check](docs/health.png)
 
 <a id="en-dashboard"></a>
 
@@ -280,10 +285,15 @@ flowchart TD
 - **Rate limit:** Free key'e (10/dk) burst → ~10× `200` sonra `429 + Retry-After`.
 - **Anomali:** Bir anahtara çok sayıda sahte IP üzerinden istek gönderildiğinde sistem anahtarı test sırasında otomatik olarak askıya alır (sonraki istekler → `401`) ve `AnomalyLog` kaydı oluşturur.
 
-<!-- ![Cache HIT vs MISS](docs/cache.png) -->
-<!-- ![Rate limit k6](docs/ratelimit.png) -->
-<!-- ![Anomali auto-suspend](docs/anomaly.png) -->
-<!-- ![Yönetim paneli](docs/dashboard.png) -->
+![Cache HIT vs MISS](docs/cache.png)
+
+![Rate limit k6](docs/ratelimit.png)
+
+![Anomali auto-suspend](docs/anomaly.png)
+
+![Yönetim paneli](docs/dashboard.png)
+
+![Sağlık kontrolü](docs/health.png)
 
 <a id="tr-dashboard"></a>
 
