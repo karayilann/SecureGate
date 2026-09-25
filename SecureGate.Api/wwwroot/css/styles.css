@@ -1,13 +1,13 @@
 :root {
-    --bg: #0f172a;
-    --surface: #1e293b;
-    --surface-2: #334155;
+    --bg: #06080c;
+    --surface: #11141c;
+    --surface-2: #1b202c;
     --text: #e2e8f0;
     --muted: #94a3b8;
     --primary: #38bdf8;
     --danger: #f87171;
     --success: #4ade80;
-    --border: #334155;
+    --border: #232938;
 }
 
 * { box-sizing: border-box; }
@@ -103,8 +103,8 @@ button.small { padding: .35rem .6rem; font-size: .8rem; }
     align-items: center;
     gap: 1rem;
     padding: .75rem 1.25rem;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
+    background: #1e293b; /* Navbar sabit kalacak */
+    border-bottom: 1px solid #334155;
 }
 
 .brand { font-weight: 700; font-size: 1.1rem; }
@@ -116,7 +116,7 @@ button.small { padding: .35rem .6rem; font-size: .8rem; }
     font-weight: 500;
 }
 
-.nav-btn.active { background: var(--surface-2); color: var(--text); }
+.nav-btn.active { background: #334155; color: var(--text); }
 
 .content { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
 
